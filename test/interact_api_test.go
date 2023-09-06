@@ -32,7 +32,7 @@ func TestFavorite(t *testing.T) {
 		Expect().
 		Status(http.StatusOK).
 		JSON().Object()
-	favoriteListResp.Value("status_code").Number().IsEqual(0)
+	favoriteListResp.Value("status_code").String().IsEqualFold("0")
 	for _, element := range favoriteListResp.Value("video_list").Array().Iter() {
 		video := element.Object()
 		video.ContainsKey("id")

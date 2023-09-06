@@ -177,7 +177,7 @@ type (
 	douyinCommentActionResponse {
 		Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
 		Status_msg  string `json:"statusMsg"`  // 返回状态描述
-		//        comment Comment // 评论成功返回评论内容，不需要重新拉取整个列表
+		Respond_comment Comment // 评论成功返回评论内容，不需要重新拉取整个列表
 	}
 
 	Comment {

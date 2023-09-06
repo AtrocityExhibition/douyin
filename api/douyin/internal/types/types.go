@@ -114,7 +114,7 @@ type DouyinFavoriteListRequest struct {
 type DouyinFavoriteListResponse struct {
 	Status_code string  `json:"status_code"` // 状态码，0-成功，其他值-失败
 	Status_msg  string `json:"status_msg"`  // 返回状态描述
-	Video_list  []Video `json:"videoList"`  // 用户点赞视频列表
+	Video_list  []Video `json:"video_list"`  // 用户点赞视频列表
 }
 
 type DouyinCommentActionRequest struct {
@@ -128,6 +128,7 @@ type DouyinCommentActionRequest struct {
 type DouyinCommentActionResponse struct {
 	Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
 	Status_msg  string `json:"status_msg"`  // 返回状态描述
+	Respond_comment Comment `json:"comment"` //评论内容
 }
 
 type Comment struct {
