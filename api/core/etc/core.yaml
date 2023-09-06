@@ -1,0 +1,12 @@
+Name: social
+Host: 0.0.0.0
+Port: 8888
+
+CoreRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+
+#Auth:
+#  AccessSecret: "weeRRG9Z2L79RabdzUFrBd97j1PSDcQfDHjeWWtEwJA"

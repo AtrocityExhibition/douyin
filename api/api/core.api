@@ -1,0 +1,144 @@
+syntax = "v1"
+
+info(
+	title: "douyin.social"
+	desc: "抖音核心功能"
+	author: "duuhiy"
+)
+
+type (
+	User {
+		Id               int64  `json:"id"`               // 用户id
+		Name             string `json:"name"`             // 用户名称
+		Follow_count     int64  `json:"follow_count"`     // 关注总数
+		Follower_count   int64  `json:"follower_count"`   // 粉丝总数
+		Is_follow        bool   `json:"is_follow"`        // true-已关注，false-未关注
+		Avatar           string `json:"avatar"`           //用户头像
+		Background_image string `json:"background_image"` //用户个人页顶部大图
+		Signature        string `json:"signature"`        //个人简介
+		Total_favorited  int64  `json:"total_favorited"`  //获赞数量
+		Work_count       int64  `json:"work_count"`       //作品数量
+		Favorite_count   int64  `json:"favorite_count"`   //点赞数量
+	}
+
+	douyinUserRegisterReq {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	douyinUserRegisterResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		User_id     int64  `json:"user_id"`     // 用户id
+		Token       string `json:"token"`       // 用户鉴权token
+	}
+
+	douyinUserLoginReq {
+		Username string `json:"username"` // 登录用户名
+		Password string `json:"password"` // 登录密码
+	}
+
+	douyinUserLoginResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		User_id     int64  `json:"user_id"`     // 用户id
+		Token       string `json:"token"`       // 用户鉴权token
+	}
+
+	douyinUserReq {
+		User_id int64  `json:"user_id"` // 用户id
+		Token   string `json:"token"`   // 用户鉴权token
+	}
+
+	douyinUserResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		//        user User // 用户信息
+	}
+
+	Video {
+		Id int64 `json:"id"` // 视频唯一标识
+		// author User // 视频作者信息
+		Play_url       string `json:"play_url"`       // 视频播放地址
+		Cover_url      string `json:"cover_url"`      // 视频封面地址
+		Favorite_count int64  `json:"favorite_count"` // 视频的点赞总数
+		Comment_count  int64  `json:"comment_count"`  // 视频的评论总数
+		Is_favorite    bool   `json:"is_favorite"`    // true-已点赞，false-未点赞
+		Title          string `json:"title"`          // 视频标题
+	}
+
+	douyinFeedReq {
+		Latest_time string `json:"latest_time"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
+		Token       string `json:"token"`       // 可选参数，登录用户设置
+	}
+
+	douyinFeedResp {
+		Status_code int32   `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"status_msg"`  // 返回状态描述
+		Video_list  []Video `json:"video_list"`  // 视频列表
+		Next_time   int64   `json:"next_time"`   // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
+	}
+
+	douyinPublishActionrReq {
+		Token string `json:"token"` // 用户鉴权token
+		Data  []byte `json:"data"`  // 视频数据
+		Title string `json:"title"` // 视频标题
+	}
+
+	douyinPublishActionResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+	}
+
+	douyinPublishListReq {
+		User_id int64  `json:"user_id"` // 用户id
+		Token   string `json:"token"`   // 用户鉴权token
+	}
+
+	douyinPublishListResp {
+		Status_code int32   `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"status_msg"`  // 返回状态描述
+		Video_list  []Video `json:"video_list"`  // 用户发布的视频列表
+	}
+)
+
+@server (
+	group: douyinUser
+	prefix :douyin/user
+)
+service core{
+	@doc "查询用户信息"
+	@handler douyinUser
+	get / (douyinUserReq) returns (douyinUserResp)
+
+	@doc "用户注册"
+	@handler douyinUserRegister
+	post /register (douyinUserRegisterReq) returns (douyinUserRegisterResp)
+
+	@doc "用户登陆"
+	@handler douyinUserLogin
+	post /login (douyinUserLoginReq) returns (douyinUserLoginResp)
+}
+
+@server (
+	group: publish
+	prefix :douyin/publish
+)
+service core{
+	@doc "用户注册"
+	@handler douyinPublishActionr
+	post /action (douyinPublishActionrReq) returns (douyinPublishActionResp)
+
+	@doc "用户登陆"
+	@handler douyinPublishList
+	get /list (douyinPublishListReq) returns (douyinPublishListResp)
+}
+
+@server (
+	group: feed
+)
+service core {
+	@doc "返回视频流"
+	@handler douyinFeed
+	get /douyin/feed (douyinFeedReq) returns (douyinFeedResp)
+}

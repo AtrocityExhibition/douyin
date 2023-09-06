@@ -1,0 +1,116 @@
+syntax = "v1"
+
+info(
+	title: "douyin.interactive"
+	desc: "抖音互动功能"
+	author: "duuhiy"
+)
+
+type (
+	douyin_favorite_action_request {
+		Token       string `json:"token"`      // 用户鉴权token
+		Video_id    int64  `json:"videoId"`    // 视频id
+		Action_type int32  `json:"actionType"` // 1-点赞，2-取消点赞
+	}
+
+	douyin_favorite_action_response {
+		Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"statusMsg"`  // 返回状态描述
+	}
+
+	douyin_favorite_list_request {
+		User_id int64  `json:"userId"` // 用户id
+		Token   string `json:"token"`  // 用户鉴权token
+	}
+
+	douyin_favorite_list_response {
+		Status_code int32   `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"statusMsg"`  // 返回状态描述
+		Video_list  []Video `json:"videoList"`  // 用户点赞视频列表
+	}
+
+	Video {
+		Id int64 `json:"id"` // 视频唯一标识
+		// author User // 视频作者信息
+		Play_url       string `json:"play_url"`       // 视频播放地址
+		Cover_url      string `json:"cover_url"`      // 视频封面地址
+		Favorite_count int64  `json:"favorite_count"` // 视频的点赞总数
+		Comment_count  int64  `json:"comment_count"`  // 视频的评论总数
+		Is_favorite    bool   `json:"is_favorite"`    // true-已点赞，false-未点赞
+		Title          string `json:"title"`          // 视频标题
+	}
+
+	User {
+		Id               int64  `json:"id"`               // 用户id
+		Name             string `json:"name"`             // 用户名称
+		Follow_count     int64  `json:"follow_count"`     // 关注总数
+		Follower_count   int64  `json:"follower_count"`   // 粉丝总数
+		Is_follow        bool   `json:"is_follow"`        // true-已关注，false-未关注
+		Avatar           string `json:"avatar"`           //用户头像
+		Background_image string `json:"background_image"` //用户个人页顶部大图
+		Signature        string `json:"signature"`        //个人简介
+		Total_favorited  int64  `json:"total_favorited"`  //获赞数量
+		Work_count       int64  `json:"work_count"`       //作品数量
+		Favorite_count   int64  `json:"favorite_count"`   //点赞数量
+	}
+
+	douyin_comment_action_request {
+		Token        string `json:"token"`       // 用户鉴权token
+		Video_id     int64  `json:"videoId"`     // 视频id
+		Action_type  int32  `json:"actionType"`  // 1-发布评论，2-删除评论
+		Comment_text string `json:"commentText"` // 用户填写的评论内容，在action_type=1的时候使用
+		Comment_id   int64  `json:"commentId"`   // 要删除的评论id，在action_type=2的时候使用
+	}
+
+	douyin_comment_action_response {
+		Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"statusMsg"`  // 返回状态描述
+		//        comment Comment // 评论成功返回评论内容，不需要重新拉取整个列表
+	}
+
+	Comment {
+		Id int64 `json:"id"` // 视频评论id
+		//    user User // 评论用户信息
+		Content     string `json:"content"`    // 评论内容
+		Create_date string `json:"createDate"` // 评论发布日期，格式 mm-dd
+	}
+
+	douyin_comment_list_request {
+		Token    string `json:"token"`   // 用户鉴权token
+		Video_id int64  `json:"videoId"` // 视频id
+	}
+
+	douyin_comment_list_response {
+		Status_code  int32     `json:"statusCode"`  // 状态码，0-成功，其他值-失败
+		Status_msg   string    `json:"statusMsg"`   // 返回状态描述
+		Comment_list []Comment `json:"commentList"` // 评论列表
+	}
+)
+
+@server (
+	group: douyinFavorite
+	prefix: douyin/favorite
+)
+service interactive {
+	@doc "点赞/取消点赞"
+	@handler douyinFavoriteAction
+	get / (douyin_favorite_action_request) returns (douyin_favorite_action_response)
+
+	@doc "查看点赞列表"
+	@handler douyinFavoriteList
+	post /register (douyin_favorite_list_request) returns (douyin_favorite_list_response)
+}
+
+@server (
+	group: douyinComment
+	prefix: douyin/comment
+)
+service interactive {
+	@doc "评论/删除评论"
+	@handler douyinFCommentAction
+	get / (douyin_comment_action_request) returns (douyin_comment_action_response)
+
+	@doc "查看评论列表"
+	@handler douyinCommentList
+	post /register (douyin_comment_list_request) returns (douyin_comment_list_response)
+}

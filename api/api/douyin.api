@@ -1,0 +1,341 @@
+syntax = "v1"
+
+info(
+	title: "douyin"
+	desc: "抖音api部分"
+	author: "duuhiy"
+)
+
+type (
+	User {
+		Id               int64  `json:"id"`               // 用户id
+		Name             string `json:"name"`             // 用户名称
+		Follow_count     int64  `json:"follow_count"`     // 关注总数
+		Follower_count   int64  `json:"follower_count"`   // 粉丝总数
+		Is_follow        bool   `json:"is_follow"`        // true-已关注，false-未关注
+		Avatar           string `json:"avatar"`           //用户头像
+		Background_image string `json:"background_image"` //用户个人页顶部大图
+		Signature        string `json:"signature"`        //个人简介
+		Total_favorited  int64  `json:"total_favorited"`  //获赞数量
+		Work_count       int64  `json:"work_count"`       //作品数量
+		Favorite_count   int64  `json:"favorite_count"`   //点赞数量
+	}
+
+	douyinUserRegisterReq {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+
+	douyinUserRegisterResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		User_id     int64  `json:"user_id"`     // 用户id
+		Token       string `json:"token"`       // 用户鉴权token
+	}
+
+	douyinUserLoginReq {
+		Username string `json:"username"` // 登录用户名
+		Password string `json:"password"` // 登录密码
+	}
+
+	douyinUserLoginResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		User_id     int64  `json:"user_id"`     // 用户id
+		Token       string `json:"token"`       // 用户鉴权token
+	}
+
+	douyinUserReq {
+		User_id int64  `json:"user_id"` // 用户id
+		Token   string `json:"token"`   // 用户鉴权token
+	}
+
+	douyinUserResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+		//        user User // 用户信息
+	}
+
+	Video {
+		Id int64 `json:"id"` // 视频唯一标识
+		// author User // 视频作者信息
+		Play_url       string `json:"play_url"`       // 视频播放地址
+		Cover_url      string `json:"cover_url"`      // 视频封面地址
+		Favorite_count int64  `json:"favorite_count"` // 视频的点赞总数
+		Comment_count  int64  `json:"comment_count"`  // 视频的评论总数
+		Is_favorite    bool   `json:"is_favorite"`    // true-已点赞，false-未点赞
+		Title          string `json:"title"`          // 视频标题
+	}
+
+	douyinFeedReq {
+		Latest_time string `json:"latest_time"` // 可选参数，限制返回视频的最新投稿时间戳，精确到秒，不填表示当前时间
+		Token       string `json:"token"`       // 可选参数，登录用户设置
+	}
+
+	douyinFeedResp {
+		Status_code int32   `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"status_msg"`  // 返回状态描述
+		Video_list  []Video `json:"video_list"`  // 视频列表
+		Next_time   int64   `json:"next_time"`   // 本次返回的视频中，发布最早的时间，作为下次请求时的latest_time
+	}
+
+	douyinPublishActionrReq {
+		Token string `json:"token"` // 用户鉴权token
+		Data  []byte `json:"data"`  // 视频数据
+		Title string `json:"title"` // 视频标题
+	}
+
+	douyinPublishActionResp {
+		Status_code int32  `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"status_msg"`  // 返回状态描述
+	}
+
+	douyinPublishListReq {
+		User_id int64  `json:"user_id"` // 用户id
+		Token   string `json:"token"`   // 用户鉴权token
+	}
+
+	douyinPublishListResp {
+		Status_code int32   `json:"status_code"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"status_msg"`  // 返回状态描述
+		Video_list  []Video `json:"video_list"`  // 用户发布的视频列表
+	}
+)
+
+@server (
+	group: douyinUser
+	prefix :douyin/user
+)
+service douyin{
+	@doc "查询用户信息"
+	@handler douyinUser
+	get / (douyinUserReq) returns (douyinUserResp)
+
+	@doc "用户注册"
+	@handler douyinUserRegister
+	post /register (douyinUserRegisterReq) returns (douyinUserRegisterResp)
+
+	@doc "用户登陆"
+	@handler douyinUserLogin
+	post /login (douyinUserLoginReq) returns (douyinUserLoginResp)
+}
+
+@server (
+	group: publish
+	prefix :douyin/publish
+)
+service douyin{
+	@doc "用户注册"
+	@handler douyinPublishActionr
+	post /action (douyinPublishActionrReq) returns (douyinPublishActionResp)
+
+	@doc "用户登陆"
+	@handler douyinPublishList
+	get /list (douyinPublishListReq) returns (douyinPublishListResp)
+}
+
+@server (
+	group: feed
+)
+service douyin {
+	@doc "返回视频流"
+	@handler douyinFeed
+	get /douyin/feed (douyinFeedReq) returns (douyinFeedResp)
+}
+
+type (
+	douyinFavoriteActionRequest {
+		Token       string `json:"token"`      // 用户鉴权token
+		Video_id    int64  `json:"videoId"`    // 视频id
+		Action_type int32  `json:"actionType"` // 1-点赞，2-取消点赞
+	}
+
+	douyinFavoriteActionResponse {
+		Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"statusMsg"`  // 返回状态描述
+	}
+
+	douyinFavoriteListRequest {
+		User_id int64  `json:"userId"` // 用户id
+		Token   string `json:"token"`  // 用户鉴权token
+	}
+
+	douyinFavoriteListResponse {
+		Status_code int32   `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string  `json:"statusMsg"`  // 返回状态描述
+		Video_list  []Video `json:"videoList"`  // 用户点赞视频列表
+	}
+
+	douyinCommentActionRequest {
+		Token        string `json:"token"`       // 用户鉴权token
+		Video_id     int64  `json:"videoId"`     // 视频id
+		Action_type  int32  `json:"actionType"`  // 1-发布评论，2-删除评论
+		Comment_text string `json:"commentText"` // 用户填写的评论内容，在action_type=1的时候使用
+		Comment_id   int64  `json:"commentId"`   // 要删除的评论id，在action_type=2的时候使用
+	}
+
+	douyinCommentActionResponse {
+		Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+		Status_msg  string `json:"statusMsg"`  // 返回状态描述
+		//        comment Comment // 评论成功返回评论内容，不需要重新拉取整个列表
+	}
+
+	Comment {
+		Id int64 `json:"id"` // 视频评论id
+		//    user User // 评论用户信息
+		Content     string `json:"content"`    // 评论内容
+		Create_date string `json:"createDate"` // 评论发布日期，格式 mm-dd
+	}
+
+	douyinCommentListRequest {
+		Token    string `json:"token"`   // 用户鉴权token
+		Video_id int64  `json:"videoId"` // 视频id
+	}
+
+	douyinCommentListResponse {
+		Status_code  int32     `json:"statusCode"`  // 状态码，0-成功，其他值-失败
+		Status_msg   string    `json:"statusMsg"`   // 返回状态描述
+		Comment_list []Comment `json:"commentList"` // 评论列表
+	}
+)
+
+@server (
+	group: douyinFavorite
+	prefix: douyin/favorite
+)
+service douyin {
+	@doc "点赞/取消点赞"
+	@handler douyinFavoriteAction
+	get / (douyinFavoriteActionRequest) returns (douyinFavoriteActionResponse)
+
+	@doc "查看点赞列表"
+	@handler douyinFavoriteList
+	post /register (douyinFavoriteListRequest) returns (douyinFavoriteListResponse)
+}
+
+@server (
+	group: douyinComment
+	prefix: douyin/comment
+)
+service douyin {
+	@doc "评论/删除评论"
+	@handler douyinCommentAction
+	get / (douyinCommentActionRequest) returns (douyinCommentActionResponse)
+
+	@doc "查看评论列表"
+	@handler douyinCommentList
+	post /register (douyinCommentListRequest) returns (douyinCommentListResponse)
+}
+
+type douyinRelationActionRequest {
+	Token       string `json:"token"`      // 用户鉴权token
+	To_user_id  int64  `json:"toUserId"`   // 对方用户id
+	Action_type int32  `json:"actionType"` // 1-关注，2-取消关注
+}
+
+type douyinRelationActionResponse {
+	Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+	Status_msg  string `json:"statusMsg"`  // 返回状态描述
+}
+
+type douyinRelationFollowListRequest {
+	User_id int64  `json:"userId"` // 用户id
+	Token   string `json:"token"`  // 用户鉴权token
+}
+
+type douyinRelationFollowListResponse {
+	Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+	Status_msg  string `json:"statusMsg"`  // 返回状态描述
+	// User_list User `json:"userList"` // 用户信息列表
+}
+
+type douyinRelationFollowerListRequest {
+	User_id int64  `json:"userId"` // 用户id
+	Token   string `json:"token"`  // 用户鉴权token
+}
+
+type douyinRelationFollowerListResponse {
+	Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+	Status_msg  string `json:"statusMsg"`  // 返回状态描述
+	// User_list User `json:"userList"` // 用户信息列表
+}
+
+type douyinRelationFriendListRequest {
+	User_id int64  `json:"userId"` // 用户id
+	Token   string `json:"token"`  // 用户鉴权token
+}
+
+type douyinRelationFriendListResponse {
+	Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+	Status_msg  string `json:"statusMsg"`  // 返回状态描述
+	//User_list User `json:"userList"` // 用户信息列表
+}
+
+type douyinMessageChatRequest {
+	Token        string `json:"token"`      // 用户鉴权token
+	To_user_id   int64  `json:"toUserId"`   // 对方用户id
+	Pre_msg_time int64  `json:"preMsgTime"` //上次最新消息的时间（新增字段-apk更新中）
+}
+
+type douyinMessageChatResponse {
+	Status_code  int32     `json:"statusCode"`  // 状态码，0-成功，其他值-失败
+	Status_msg   string    `json:"statusMsg"`   // 返回状态描述
+	Message_list []Message `json:"messageList"` // 消息列表
+}
+
+type Message {
+	Id           int64  `json:"id"`         // 消息id
+	To_user_id   int64  `json:"toUserId"`   // 该消息接收者的id
+	From_user_id int64  `json:"fromUserId"` // 该消息发送者的id
+	Content      string `json:"content"`    // 消息内容
+	Create_time  string `json:"createTime"` // 消息创建时间
+}
+
+type douyinMessageActionRequest {
+	Token       string `json:"token"`      // 用户鉴权token
+	To_user_id  int64  `json:"toUserId"`   // 对方用户id
+	Action_type int32  `json:"actionType"` // 1-发送消息
+	Content     string `json:"content"`    // 消息内容
+}
+
+type douyinMessageActionResponse {
+	Status_code int32  `json:"statusCode"` // 状态码，0-成功，其他值-失败
+	Status_msg  string `json:"statusMsg"`  // 返回状态描述
+}
+
+@server (
+	group: douyinRelation
+	prefix: douyin/relation
+)
+service douyin {
+	@doc "关注操作"
+	@handler douyinRelationAction
+	post /action (douyinRelationActionRequest) returns (douyinRelationActionResponse)
+
+	@doc "关注列表"
+	@handler douyinRelationFollowList
+	get /follow/list (douyinRelationFollowListRequest) returns (douyinRelationFollowListResponse)
+
+	@doc "粉丝列表"
+	@handler douyinRelationFollowerList
+	get /follower/list (douyinRelationFollowerListRequest) returns (douyinRelationFollowerListResponse)
+
+	@doc "好友列表"
+	@handler douyinRelationFriendList
+	get /friend/list (douyinRelationFriendListRequest) returns (douyinRelationFriendListResponse)
+
+}
+
+@server (
+	group: douyinMessage
+	prefix: douyin/message
+)
+service douyin {
+	@doc "聊天记录"
+	@handler douyinMessageChat
+	post /chat (douyinMessageChatRequest) returns (douyinMessageChatResponse)
+
+	@doc "发送消息"
+	@handler douyinMessageAction
+	get /action (douyinMessageActionRequest) returns (douyinMessageActionResponse)
+}

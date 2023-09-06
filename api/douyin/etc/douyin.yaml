@@ -1,0 +1,25 @@
+Name: douyin
+Host: 0.0.0.0
+Port: 8888
+
+CoreRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+
+InteractiveRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: interactive.rpc
+
+SocialRpcConf:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: social.rpc
+
+Log:
+  Level: error
+  Mode: file

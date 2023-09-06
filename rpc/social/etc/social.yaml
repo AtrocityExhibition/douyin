@@ -1,0 +1,14 @@
+Name: social.rpc
+ListenOn: 0.0.0.0:8082
+
+Mode: dev
+DB:
+  DataSource: root:root@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=true&loc=Local
+
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: social.rpc
+
+Log:
+  Level: error

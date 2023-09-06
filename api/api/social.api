@@ -1,0 +1,121 @@
+syntax = "v1"
+
+info(
+    title: "douyin.interactive"
+    desc: "抖音社交功能"
+    author: "duuhiy"
+)
+
+type douyin_relation_action_request {
+ Token string `json:"token"` // 用户鉴权token
+ To_user_id int64 `json:"toUserId"` // 对方用户id
+ Action_type int32 `json:"actionType"`// 1-关注，2-取消关注
+}
+
+type douyin_relation_action_response {
+ Status_code int32 `json:"statusCode"`// 状态码，0-成功，其他值-失败
+ Status_msg string `json:"statusMsg"` // 返回状态描述
+}
+
+type douyin_relation_follow_list_request {
+ User_id int64 `json:"userId"` // 用户id
+ Token string `json:"token"` // 用户鉴权token
+}
+
+type douyin_relation_follow_list_response {
+ Status_code int32 `json:"statusCode"` // 状态码，0-成功，其他值-失败
+ Status_msg string `json:"statusMsg"` // 返回状态描述
+//User_list User `json:"userList"` // 用户信息列表
+}
+
+
+type douyin_relation_follower_list_request {
+ User_id int64 `json:"userId"` // 用户id
+ Token string `json:"token"` // 用户鉴权token
+}
+
+type douyin_relation_follower_list_response {
+ Status_code int32 `json:"statusCode"` // 状态码，0-成功，其他值-失败
+ Status_msg string `json:"statusMsg"`// 返回状态描述
+//User_list User `json:"userList"` // 用户信息列表
+}
+
+type douyin_relation_friend_list_request {
+    User_id int64 `json:"userId"` // 用户id
+    Token string `json:"token"` // 用户鉴权token
+}
+
+type douyin_relation_friend_list_response {
+    Status_code int32 `json:"statusCode"` // 状态码，0-成功，其他值-失败
+    Status_msg string `json:"statusMsg"`// 返回状态描述
+//User_list User `json:"userList"` // 用户信息列表
+}
+
+type douyin_message_chat_request {
+      Token string `json:"token"` // 用户鉴权token
+ To_user_id int64 `json:"toUserId"` // 对方用户id
+ Pre_msg_time int64 `json:"preMsgTime"`//上次最新消息的时间（新增字段-apk更新中）
+}
+
+type douyin_message_chat_response {
+    Status_code int32 `json:"statusCode"` // 状态码，0-成功，其他值-失败
+    Status_msg string `json:"statusMsg"`// 返回状态描述
+ Message_list []Message `json:"messageList"`// 消息列表
+}
+
+type Message {
+ Id int64 `json:"id"` // 消息id
+ To_user_id int64 `json:"toUserId"` // 该消息接收者的id
+ From_user_id int64 `json:"fromUserId"` // 该消息发送者的id
+ Content string `json:"content"` // 消息内容
+ Create_time string `json:"createTime"` // 消息创建时间
+}
+
+type douyin_message_action_request {
+       Token string `json:"token"` // 用户鉴权token
+       To_user_id int64 `json:"toUserId"` // 对方用户id
+ Action_type int32 `json:"actionType"` // 1-发送消息
+ Content string `json:"content"` // 消息内容
+}
+
+type douyin_message_action_response {
+    Status_code int32 `json:"statusCode"` // 状态码，0-成功，其他值-失败
+    Status_msg string `json:"statusMsg"`// 返回状态描述
+}
+
+@server (
+    group: douyinComment
+    prefix: douyin/relation
+)
+service social {
+    @doc "关注操作"
+    @handler douyinRelationAction
+    post /action (douyin_relation_action_request) returns (douyin_relation_action_response)
+
+    @doc "关注列表"
+    @handler douyinRelationFollowList
+    get /follow/list (douyin_relation_follow_list_request) returns (douyin_relation_follow_list_request)
+
+    @doc "粉丝列表"
+    @handler douyinRelationFollowerList
+    get /follower/list (douyin_relation_follower_list_request) returns (douyin_relation_follower_list_response)
+
+    @doc "好友列表"
+    @handler douyinRelationFriendList
+    get /friend/list (douyin_relation_friend_list_request) returns (douyin_relation_friend_list_response)
+
+}
+
+@server (
+    group: douyinComment
+    prefix: douyin/message
+)
+service social {
+    @doc "聊天记录"
+    @handler douyinMessageChat
+    post /chat (douyin_message_chat_request) returns (douyin_message_chat_response)
+
+    @doc "发送消息"
+    @handler douyinMessageAction
+    get /action (douyin_message_action_request) returns (douyin_message_action_response)
+}

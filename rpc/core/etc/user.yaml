@@ -1,0 +1,14 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8080
+Mode: dev
+DB:
+  DataSource: root:root@tcp(127.0.0.1:3306)/douyin?charset=utf8mb4&parseTime=true&loc=Local
+
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: user.rpc
+
+Log:
+  Level: error
+  Mode: file
