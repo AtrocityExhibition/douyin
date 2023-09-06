@@ -39,15 +39,14 @@ func (l *DouyinUserRegisterLogic) DouyinUserRegister(in *pb.DouyinUserRegisterRe
 	}
 	result, err := l.svcCtx.UserModel.Insert(l.ctx, u)
 
-	//修改, 在出现两个相同用户名的时候返回错误提示
-	if err.(*mysql.MySQLError).Number == MYSQL_KEY_EXITS {
-		return &pb.DouyinUserRegisterResponse{
-			StatusCode: 1,
-			StatusMsg:  "用户名已存在",
-		}, nil
-	}
-
 	if err != nil {
+		//修改, 在出现两个相同用户名的时候返回错误提示
+		if err.(*mysql.MySQLError).Number == MYSQL_KEY_EXITS {
+			return &pb.DouyinUserRegisterResponse{
+				StatusCode: 1,
+				StatusMsg:  "用户名已存在",
+			}, nil
+		}
 		return &pb.DouyinUserRegisterResponse{
 			StatusCode: 1,
 		}, err

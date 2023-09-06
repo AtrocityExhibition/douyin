@@ -53,8 +53,8 @@ func TestUserAction(t *testing.T) {
 	loginResp.Value("user_id").Number().Gt(0)
 	loginResp.Value("token").String().Length().Gt(0)
 
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6InpoYW5nIiwiUGFzc3dvcmQiOiJ6aGFuZyJ9.quO_3cCzzTrhylNqmP56bgiXCw2QUdhsE_sBhEL8pNo"
-	uid := 1
+	token := loginResp.Value("token").String().Raw()
+	uid := int(loginResp.Value("user_id").Number().Raw())
 	userResp := e.GET("/douyin/user/").
 		WithQuery("token", token).
 		WithQuery("user_id", uid).
@@ -70,7 +70,7 @@ func TestUserAction(t *testing.T) {
 
 func TestPublish(t *testing.T) {
 	e := newExpect(t)
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6InpoYW5nIiwiUGFzc3dvcmQiOiJ6aGFuZyJ9.quO_3cCzzTrhylNqmP56bgiXCw2QUdhsE_sBhEL8pNo"
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VybmFtZSI6ImRvdXlpbjQyMDMwIiwiUGFzc3dvcmQiOiJkb3V5aW40MjAzMCJ9.B8GpwWBnpFLUP2YkdMSjY7t4nnY93S-tt_KjNlsSt2Y"
 
 	publishResp := e.POST("/douyin/publish/action/").
 		WithMultipart().
@@ -83,7 +83,7 @@ func TestPublish(t *testing.T) {
 	publishResp.Value("status_code").Number().IsEqual(0)
 
 	publishListResp := e.GET("/douyin/publish/list/").
-		WithQuery("user_id", 1).WithQuery("token", token).
+		WithQuery("user_id", 5).WithQuery("token", token).
 		Expect().
 		Status(http.StatusOK).
 		JSON().Object()
