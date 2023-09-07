@@ -1,7 +1,7 @@
 package OSSClient
 
 import (
-	"douyin/rpc/core/pb"
+	//"douyin/rpc/core/pb"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 )
@@ -17,4 +17,4 @@ var OSSClient, _ = oss.New("http://oss-cn-chengdu.aliyuncs.com", "LTAI5tEAPAU2yw
 var Bucket, _ = OSSClient.Bucket(BucketName)
 
 // 初始化VideoList
-var VideoList = []*pb.Video{}
+//var VideoList = []*pb.Video{}

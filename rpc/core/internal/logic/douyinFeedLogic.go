@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"douyin/rpc/core/internal/JWT"
-	oss "douyin/rpc/core/internal/OSSClient"
 	"douyin/rpc/core/internal/svc"
 	"douyin/rpc/core/pb"
 	"douyin/rpc/core/utils"
@@ -29,7 +28,10 @@ func NewDouyinFeedLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Douyin
 
 func (l *DouyinFeedLogic) DouyinFeed(in *pb.DouyinFeedRequest) (*pb.DouyinFeedResponse, error) {
 	// todo: add your logic here and delete this line
-	_ = InitVideoList(l.svcCtx, l.ctx)
+	videolist, err := InitVideoList(l.svcCtx, l.ctx)
+	if err != nil {
+		fmt.Println("查找全部视频出错")
+	}
 	// video 是否 点过赞需要去favorite中查看
 	fmt.Println("token = ", in.Token)
 	if in.Token != "" {
@@ -42,7 +44,7 @@ func (l *DouyinFeedLogic) DouyinFeed(in *pb.DouyinFeedRequest) (*pb.DouyinFeedRe
 		}
 		// 根据u_id和video_id去favorite中查找，若存在则为点赞为true，否则为false
 		// author中的is_follow也需要查表
-		for _, v := range oss.VideoList {
+		for _, v := range videolist {
 			// 1.
 			_, err := l.svcCtx.FavoriteModel.FindOneByUserVideo(l.ctx, u.Id, v.Id)
 			if err != nil {
@@ -61,19 +63,21 @@ func (l *DouyinFeedLogic) DouyinFeed(in *pb.DouyinFeedRequest) (*pb.DouyinFeedRe
 	}
 	return &pb.DouyinFeedResponse{
 		StatusCode: 0,
-		VideoList:  oss.VideoList,
+		VideoList:  videolist,
 		NextTime:   time.Now().Unix(),
 	}, nil
 }
 
-func InitVideoList(svcCtx *svc.ServiceContext, ctx context.Context) error {
+func InitVideoList(svcCtx *svc.ServiceContext, ctx context.Context) ([]*pb.Video, error) {
 	// 如果传入了token，需要判断video的favorite，否则favorite全部为false
 	// 从数据库中加载videolist
+	var videolist = []*pb.Video{}
+
 	result, err := svcCtx.VideoModel.FindAll(ctx)
 	if err != nil {
 		fmt.Println("查询所有video出错了")
 		fmt.Println(err)
-		return err
+		return videolist, err
 	}
 
 	for _, video := range result {
@@ -81,11 +85,11 @@ func InitVideoList(svcCtx *svc.ServiceContext, ctx context.Context) error {
 		if err != nil {
 			fmt.Println("FindOneByToken 出错了")
 			fmt.Println(err)
-			return err
+			return videolist, err
 		}
 		author, _ := utils.UserModelPb(user)
 		pbVideo, _ := utils.VideoModelPb(video, author)
-		oss.VideoList = append(oss.VideoList, pbVideo)
+		videolist = append(videolist, pbVideo)
 	}
-	return nil
+	return videolist, nil
 }

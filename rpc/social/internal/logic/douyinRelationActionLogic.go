@@ -53,9 +53,14 @@ func (l *DouyinRelationActionLogic) DouyinRelationAction(in *pb.DouyinRelationAc
 		// 关注
 		// 1. 将关注信息插入relation中
 		user, err := l.svcCtx.UserModel.FindOneByToken(l.ctx, username, password)
+		if err != nil {
+			return &pb.DouyinRelationActionResponse{
+				StatusCode: 1,
+			}, errors.New("查找用户信息失败")
+		}
 		relationItem := relation.Relation{
-			UserId:   sql.NullInt64{user.Id, true}, // 从token解析user_id
-			ToUserId: sql.NullInt64{in.ToUserId, true},
+			UserId:   sql.NullInt64{Int64: user.Id, Valid: true}, // 从token解析user_id
+			ToUserId: sql.NullInt64{Int64: in.ToUserId, Valid: true},
 		}
 		_, err = l.svcCtx.RelationModel.Insert(l.ctx, &relationItem)
 		if err != nil {
